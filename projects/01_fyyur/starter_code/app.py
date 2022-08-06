@@ -2,6 +2,7 @@
 # Imports
 #----------------------------------------------------------------------------#
 
+from enum import unique
 import json
 import dateutil.parser
 import babel
@@ -12,7 +13,6 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
-import config
 from config import *
 from flask_migrate import Migrate
 #----------------------------------------------------------------------------#
@@ -33,7 +33,7 @@ migrate = Migrate(app, db)
 shows = db.Table('shows',
     db.Column('artist_id', db.Integer,db.ForeignKey('artist.id'), primary_key=True),
     db.Column('venue_id', db.Integer,db.ForeignKey('venue.id'), primary_key=True),
-    db.Column('show_date', db.Date(), nullable=False)
+    db.Column('show_date', db.DateTime(), nullable=False, unique=True)
     )
 
 class Venue(db.Model):
@@ -46,6 +46,7 @@ class Venue(db.Model):
     address = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
+    website = db.Column(db.String(120))
     facebook_link = db.Column(db.String(120))
     seeking_talents = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(500))
@@ -61,10 +62,11 @@ class Artist(db.Model):
     phone = db.Column(db.String(120))
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
+    website = db.Column(db.String(120))
     facebook_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_venue_description = db.Column(db.String(500))
-    venues = db.relationship('artist',secondary=shows, backref=db.backref('shows', lazy=True))
+    venues = db.relationship('venue',secondary=shows, backref=db.backref('shows', lazy=True))
 
 
 #----------------------------------------------------------------------------#
@@ -97,6 +99,8 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
+
+  
   data=[{
     "city": "San Francisco",
     "state": "CA",
