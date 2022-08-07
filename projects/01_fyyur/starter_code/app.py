@@ -30,11 +30,13 @@ migrate = Migrate(app, db)
 # Models.
 #----------------------------------------------------------------------------#
 
-shows = db.Table('shows',
-    db.Column('artist_id', db.Integer,db.ForeignKey('artist.id'), primary_key=True),
-    db.Column('venue_id', db.Integer,db.ForeignKey('venue.id'), primary_key=True),
-    db.Column('show_date', db.DateTime(), nullable=False, unique=True)
-    )
+class Show(db.Model):
+  __tablename__ ='show'
+
+  id = db.Column(db.Integer, primary_key=True)
+  artist_id = db.Column(db.Integer,db.ForeignKey('artist.id'), nullable=False)
+  venue_id = db.Column(db.Integer,db.ForeignKey('venue.id'), nullable=False)
+  start_date = db.Column(db.DateTime(), nullable=False, unique=True)
 
 class Venue(db.Model):
     __tablename__ = 'venue'
@@ -44,12 +46,14 @@ class Venue(db.Model):
     city = db.Column(db.String(120), nullable=False)
     state = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(120), nullable=False)
+    genres = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     website = db.Column(db.String(120))
     facebook_link = db.Column(db.String(120))
     seeking_talents = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(500))
+    shows = db.relationship('Show', cascade='all, delete-orphan', backref='venue', lazy=True)
 
     
 class Artist(db.Model):
@@ -66,7 +70,7 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_venue_description = db.Column(db.String(500))
-    venues = db.relationship('venue',secondary=shows, backref=db.backref('shows', lazy=True))
+    shows = db.relationship('Show', cascade='all, delete-orphan', backref='artist', lazy=True)
 
 
 #----------------------------------------------------------------------------#
@@ -100,7 +104,7 @@ def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
 
-  
+
   data=[{
     "city": "San Francisco",
     "state": "CA",
@@ -234,6 +238,7 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
+
   # TODO: modify data to be the data object returned from db insertion
 
   # on successful db insert, flash success
