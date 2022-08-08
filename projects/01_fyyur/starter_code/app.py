@@ -24,6 +24,7 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
+
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
@@ -103,29 +104,20 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
+  rows = Venue.query.all()
+  venues_dict = {}
 
-
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  for row in rows:
+    city_state = (row.city, row.state)
+    if city_state not in venues_dict.keys():
+      venues_dict[city_state] = []
+      venues_dict[city_state].append(dict(
+        id = row.id,
+        name = row.name, 
+        upcoming_shows = Show.query.filter(Show.venue_id == row.id, Show.start_date > datetime.today()).count()
+      ))
+  data = [ dict(city=k[0], state=k[1], venues=v) for k, v in venues_dict.items() ]
+    
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
