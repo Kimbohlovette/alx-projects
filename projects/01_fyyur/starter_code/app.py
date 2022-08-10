@@ -304,14 +304,14 @@ def show_artist(artist_id):
   artist = Artist.query.get(artist_id)
   shows = Show.query.filter(Show.artist_id==artist_id)
 
-  past_shows = [{"artist_id": show.artist.id,
-                  "artist_name": show.artist.name,
-                  "artist_image_link": show.artist.image_link,
+  past_shows = [{"venue_id": show.venue.id,
+                  "venue_name": show.venue.name,
+                  "venue_image_link": show.venue.image_link,
                   "start_time": show.start_date.strftime("%m/%d/%Y, %H:%M:%S")
                   } for show in shows.all() if show.start_date < datetime.today() ]          
-  upcoming_shows = [{"artist_id": show.artist.id,
-                  "artist_name": show.artist.name,
-                  "artist_image_link": show.artist.image_link,
+  upcoming_shows = [{"venue_id": show.venue.id,
+                  "venue_name": show.venue.name,
+                  "venue_image_link": show.venue.image_link,
                   "start_time": show.start_date.strftime("%m/%d/%Y, %H:%M:%S")
                   } for show in shows.all() if show.start_date > datetime.today()  ]
 
@@ -327,7 +327,7 @@ def show_artist(artist_id):
       "phone": artist.phone,
       "website": artist.website,
       "facebook_link": artist.facebook_link,
-      "seeking_talent": artist.seeking_venue,
+      "seeking_venue": artist.seeking_venue,
       "seeking_description": artist.seeking_venue_description,
       "image_link": artist.image_link,
       "past_shows": past_shows,
@@ -342,21 +342,20 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  form = ArtistForm()
-  artist={
-    "id": 4,
-    "name": "Guns N Petals",
-    "genres": ["Rock n Roll"],
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "326-123-5000",
-    "website": "https://www.gunsnpetalsband.com",
-    "facebook_link": "https://www.facebook.com/GunsNPetals",
-    "seeking_venue": True,
-    "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
-  }
-  # TODO: populate form with fields from artist with ID <artist_id>
+  form = ArtistForm(request.form)
+  artist = Artist.query.get(artist_id)
+  
+  form.name.data = artist.name
+  form.genres.data = artist.genres
+  form.city.data = artist.city
+  form.state.data = artist.state
+  form.phone.data = artist.phone
+  form.website_link.data = artist.website
+  form.facebook_link.data = artist.facebook_link
+  form.seeking_venue.data = artist.seeking_venue
+  form.seeking_description.data = artist.seeking_venue_description
+  form.image_link.data = artist.image_link
+
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -364,11 +363,24 @@ def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
 
-  return redirect(url_for('show_artist', artist_id=artist_id))
+  form_data = ArtistForm(request.form)
+  artist = Artist.query.get(artist_id)
+  artist.name = form_data.name.data
+  artist.genres = form_data.genres.data
+  artist.city = form_data.city.data
+  artist.state = form_data.state.data
+  artist.phone = form_data.phone.data
+  artist.website = form_data.website_link.data
+  artist.facebook_link = form_data.facebook_link.data
+  artist.image_link = form_data.image_link.data
+  artist.seeking_venue = form_data.seeking_venue.data
+  artist.seeking_venue_description = form_data.seeking_description.data
+  db.session.commit()
+  return redirect(url_for('show_artist', artist_id= artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-  form = VenueForm()
+  form = VenueForm(request.form)
   venue={
     "id": 1,
     "name": "The Musical Hop",
