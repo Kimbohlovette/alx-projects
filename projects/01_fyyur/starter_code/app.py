@@ -252,46 +252,49 @@ def create_venue_submission():
     db.session.close()
     return redirect(url_for('venues'))
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/delete/<int:venue_id>')
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-  
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  try:
+    venue = Venue.query.get_or_404(venue_id)
+    db.session.delete(venue)
+    db.session.commit()
+    flash("Venue was successfully deleted!")
+    return redirect(url_for('venues'))
+  except:
+    flash("There was an error deleting venue")
+    return None
 
 #  Artists
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-  # TODO: replace with real data returned from querying the database
-  data=[{
-    "id": 4,
-    "name": "Guns N Petals",
-  }, {
-    "id": 5,
-    "name": "Matt Quevedo",
-  }, {
-    "id": 6,
-    "name": "The Wild Sax Band",
-  }]
+  artists = Artist.query.all()
+
+  data=[ {
+    "id": artist.id,
+    "name": artist.name,
+  } for artist in artists ]
+
   return render_template('pages/artists.html', artists=data)
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-  # search for "band" should return "The Wild Sax Band".
+  search_term=request.form.get('search_term', '')
+  search_result = Artist.query.filter(Artist.name.ilike('%' + search_term + '%'))
+  count = search_result.count()
+  data = [ {
+    "id": artist.id,
+    "name": artist.name,
+    "num_upcoming_shows": len(artist.shows)
+    } for artist in search_result.all() ]
+
   response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
+    "count": count,
+    "data": data
   }
-  return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+  return render_template('pages/search_artists.html', results=response)
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
