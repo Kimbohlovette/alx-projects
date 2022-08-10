@@ -178,7 +178,7 @@ def show_venue(venue_id):
 
   venue = Venue.query.filter_by(id = venue_id).first()
   shows = Show.query.filter(Show.venue_id==venue_id)
-  
+
   past_shows = [{"artist_id": show.artist.id,
                   "artist_name": show.artist.name,
                   "artist_image_link": show.artist.image_link,
@@ -225,21 +225,38 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
-
-  # TODO: modify data to be the data object returned from db insertion
-
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  return render_template('pages/home.html')
+  form = VenueForm(request.form)
+  venue = Venue(
+    name = form.name.data,
+    genres = form.genres.data,
+    address = form.address.data,
+    city = form.city.data,
+    state = form.state.data,
+    phone = form.phone.data,
+    website = form.website_link.data,
+    facebook_link = form.facebook_link.data,
+    seeking_talents = form.seeking_talent.data,
+    seeking_description = form.seeking_description.data,
+    image_link = form.image_link.data
+  )
+  try:
+    db.session.add(venue)
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  except:
+    db.session.rollback()
+    # TODO: on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  finally:
+    db.session.close()
+    return redirect(url_for('venues'))
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
+  
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
   return None
