@@ -106,19 +106,9 @@ def index():
 
 @app.route('/venues', methods=['GET'])
 def venues():
-  # TODO: replace with real venues data.
-  #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
 
-  # Algorithm to get it done
-  # 1. Get data from the database using SQLAlchemy's Model.query.all()
-  # 2. Group data as a list of dictionaries 
-  # 3. Use dictionary comprehension to iterate over the keys and convert to {city: value, state: values, venues: [item1, item2 ...]}
-  # 4 Feed data to the frontend
-
-  # Step 1
   rows = Venue.query.all()
 
-  #Step 2
   venues_dict = {}
   for row in rows:
     city_state = (row.city, row.state)
@@ -130,31 +120,17 @@ def venues():
       upcoming_shows = Show.query.filter(Show.venue_id == row.id, Show.start_date > datetime.today()).count()
     ))
 
-  # Step 3
   data = [ dict(city=k[0], state=k[1], venues=v) for k, v in venues_dict.items() ]
-  # Step 4
   return render_template('pages/venues.html', areas = data)
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # TODO: implement search on venues with partial string search. Ensure it is case-insensitive.
-  # search for Hop should return "The Musical Hop".
-  # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
 
-  # Solution Roadmap
-
-  # 1 Get required fields using filter and the ilike('%ed%') matching scheme
-  # 2 Count the result set with Model.query.count() 
-  # 3 Format and feed to response for frontend
-
-  # Step 1
   search_term=request.form.get('search_term','')
   result_set = Venue.query.filter(Venue.name.ilike('%'+ search_term +'%'))
 
-  # Step 2
   count = result_set.count()
 
-  # step 3
   data =  []
   for venue in result_set.all():
     dic = dict(
@@ -173,10 +149,6 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-  # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id
-
-  ### Code 
 
   venue = Venue.query.filter_by(id = venue_id).first()
   shows = Show.query.filter(Show.venue_id==venue_id)

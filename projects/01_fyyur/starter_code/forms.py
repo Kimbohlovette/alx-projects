@@ -194,7 +194,7 @@ class ArtistForm(Form):
     phone = StringField(
         # TODO implement validation logic for phone 
         'phone'
-    )
+    ,validators=[])
     image_link = StringField(
         'image_link'
     )
