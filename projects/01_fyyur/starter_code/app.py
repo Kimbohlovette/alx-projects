@@ -12,6 +12,7 @@ import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import ARRAY
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
@@ -50,7 +51,7 @@ class Venue(db.Model):
     city = db.Column(db.String(120), nullable=False)
     state = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(120), nullable=False)
-    genres = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String), nullable=False)
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     website = db.Column(db.String(120))
@@ -68,7 +69,7 @@ class Artist(db.Model):
     city = db.Column(db.String(120), nullable=False)
     state = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String), nullable= False)
     image_link = db.Column(db.String(500))
     website = db.Column(db.String(120))
     facebook_link = db.Column(db.String(120))
@@ -197,7 +198,7 @@ def show_venue(venue_id):
   data = {
       "id": venue.id,
       "name": venue.name,
-      "genres": venue.genres.strip('}').strip('{').split(','),
+      "genres": venue.genres,
       "address": venue.address,
       "city": venue.city,
       "state": venue.state,
@@ -322,7 +323,7 @@ def show_artist(artist_id):
   data = {
       "id": artist.id,
       "name": artist.name,
-      "genres": artist.genres.strip('}').strip('{').split(','),
+      "genres": artist.genres,
       "city": artist.city,
       "state": artist.state,
       "phone": artist.phone,

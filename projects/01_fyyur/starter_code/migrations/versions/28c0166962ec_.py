@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 718f0b01e41a
+Revision ID: 28c0166962ec
 Revises: 
-Create Date: 2022-08-07 11:50:54.909582
+Create Date: 2022-08-12 09:51:01.176809
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '718f0b01e41a'
+revision = '28c0166962ec'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('city', sa.String(length=120), nullable=False),
     sa.Column('state', sa.String(length=120), nullable=False),
     sa.Column('phone', sa.String(length=120), nullable=True),
-    sa.Column('genres', sa.String(length=120), nullable=True),
+    sa.Column('genres', sa.ARRAY(sa.String()), nullable=False),
     sa.Column('image_link', sa.String(length=500), nullable=True),
     sa.Column('website', sa.String(length=120), nullable=True),
     sa.Column('facebook_link', sa.String(length=120), nullable=True),
@@ -38,6 +38,7 @@ def upgrade():
     sa.Column('city', sa.String(length=120), nullable=False),
     sa.Column('state', sa.String(length=120), nullable=False),
     sa.Column('address', sa.String(length=120), nullable=False),
+    sa.Column('genres', sa.ARRAY(sa.String()), nullable=False),
     sa.Column('phone', sa.String(length=120), nullable=True),
     sa.Column('image_link', sa.String(length=500), nullable=True),
     sa.Column('website', sa.String(length=120), nullable=True),
@@ -48,8 +49,8 @@ def upgrade():
     )
     op.create_table('show',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('artist_id', sa.Integer(), nullable=True),
-    sa.Column('venue_id', sa.Integer(), nullable=True),
+    sa.Column('artist_id', sa.Integer(), nullable=False),
+    sa.Column('venue_id', sa.Integer(), nullable=False),
     sa.Column('start_date', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['artist_id'], ['artist.id'], ),
     sa.ForeignKeyConstraint(['venue_id'], ['venue.id'], ),
